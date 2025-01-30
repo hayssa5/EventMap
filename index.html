@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Events Map</title>
+
+    <!-- Laddar Leaflets CSS fil för att ge standardstil till kartan.-->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet/dist/leaflet.css"
+    />
+
+    <!-- Ladda Leaflet Routing Machine-stilar och -script -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.css"
+    />
+
+    <link
+      rel="stylesheet"
+      href="styles.css"
+    />
+  </head>
+  <body>
+    <header>
+      <h1>Eventomania</h1>
+      <div id="register-section">
+        <div id="auth-section">
+          <form id="register-form">
+            <label for="register-email">Registrera dig:</label>
+            <br />
+            <input
+              type="email"
+              id="register-email"
+              name="register-email"
+              placeholder="E-post"
+              required
+            />
+            <input
+              type="password"
+              id="register-password"
+              placeholder="Lösenord"
+              required
+            />
+            <button
+              id="register-button"
+              type="submit"
+            >
+              Registrera
+            </button>
+          </form>
+
+          <form id="login-form">
+            <label for="login-email">Logga in:</label>
+            <br />
+            <input
+              type="email"
+              id="login-email"
+              placeholder="E-post"
+              required
+            />
+            <input
+              type="password"
+              id="login-password"
+              placeholder="Lösenord"
+              required
+            />
+            <button
+              id="login-button"
+              type="submit"
+            >
+              Logga in
+            </button>
+          </form>
+        </div>
+        <button id="logout-button">Logga ut</button>
+      </div>
+    </header>
+
+    <main>
+      <h1>Events Map</h1>
+      <div id="map"></div>
+      <div id="search-container">
+        <label for="city-input">Sök stad eller region:</label>
+        <input
+          type="text"
+          id="city-input"
+          placeholder="Skriv in stad eller region..."
+        />
+        <button id="search-button">Sök</button>
+      </div>
+      <div id="event-list-container">
+        <h3>Events:</h3>
+        <ul id="event-list"></ul>
+      </div>
+
+      <section id="qr-section">
+        <h2>Besök vår hemsida!</h2>
+        <p>Skanna QR-kod</p>
+        <canvas id="qrcode"></canvas>
+      </section>
+    </main>
+
+    <footer></footer>
+
+    <!-- Laddar Leaflets JavaScript bibliotek för att skapa och hantera kartan -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script src="https://unpkg.com/leaflet-routing-machine/dist/leaflet-routing-machine.js"></script>
+
+    <!-- Inkluderar QRCode.js-biblioteket i HTML-filen  -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+
+    <script
+      type="module"
+      src="script.js"
+    ></script>
+  </body>
+</html>
