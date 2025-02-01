@@ -1,3 +1,5 @@
+import firebaseConfig from './config.js'; // Importera firebaseConfig från config.js
+
 // Importera Firebase och Firestore moduler från den senaste versionen
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
 import {
@@ -12,23 +14,36 @@ import {
   signOut,
 } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-auth.js';
 
-// Firebase-konfiguration och initialisering
-const firebaseConfig = {
-  apiKey: 'AIzaSyAuQ76KzJzAsqr3Hh69mMBCtIZtdi8s3tk',
-  authDomain: 'testeventmap-ffe44.firebaseapp.com',
-  databaseURL:
-    'https://testeventmap-ffe44-default-rtdb.europe-west1.firebasedatabase.app',
-  projectId: 'testeventmap-ffe44',
-  storageBucket: 'testeventmap-ffe44.firebasestorage.app',
-  messagingSenderId: '736230374626',
-  appId: '1:736230374626:web:088053d959c0b5639272bb',
-  measurementId: 'G-E14CJYYH2M',
-};
-
 // Initialisera firebaseConfig och skapa en referens till Firestore databasen
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+
+// Lyssnare för autentiseringstillstånd (firebase auth)
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    // Användaren är inloggad, visa "inloggad" status eller funktionalitet
+    console.log('✅ Användare inloggad:', user.email);
+    // Här kan du visa events och ge användaren rättigheter för att interagera med dem.
+    document.getElementById('logout-button').style.display = 'block'; // Exempelvis visa logout-knapp
+    document.getElementById('auth-section').style.display = 'block'; // Visa inloggad sektion
+  } else {
+    // Användaren är inte inloggad, hantera användargränssnittet för detta tillstånd
+    console.log('❌ Användare inte inloggad');
+    document.getElementById('logout-button').style.display = 'none'; // Dölj logout-knapp
+    document.getElementById('auth-section').style.display = 'block'; // Visa inloggningssektion
+  }
+});
+
+// Logga ut användaren varje gång sidan laddas
+auth
+  .signOut()
+  .then(() => {
+    console.log('Användaren har loggats ut automatiskt vid sidladdning');
+  })
+  .catch((error) => {
+    console.error('Fel vid utloggning:', error);
+  });
 
 // Hämta formulär och knappar
 document.getElementById('register-form').addEventListener('submit', (e) => {
@@ -139,6 +154,9 @@ const logoutUser = async () => {
     // Döljer logga ut-knappen och visar andra formulär
     document.getElementById('logout-button').style.display = 'none';
     document.getElementById('auth-section').style.display = 'block';
+
+    // Nollställ kartan och eventlistan när användaren loggar ut
+    resetEvents();
   } catch (error) {
     console.error('Fel vid utloggning:', error.message);
     alert('Fel: ' + error.message);
@@ -146,6 +164,31 @@ const logoutUser = async () => {
 };
 
 document.getElementById('logout-button').addEventListener('click', logoutUser);
+
+// Funktion för att nollställa eventen och kartan
+function resetEvents() {
+  // Töm eventlistan
+  const eventList = document.getElementById('event-list');
+  eventList.innerHTML = ''; // Töm alla event i listan
+
+  // Ta bort alla eventmarkörer från kartan
+  eventMarkers.forEach((marker) => map.removeLayer(marker));
+  eventMarkers.length = 0; // Rensa arrayen med markörer
+
+  // Ta bort eventuell rutt från kartan
+  if (routeControl) {
+    map.removeControl(routeControl);
+    routeControl = null; // Nollställ routeControl
+  }
+
+  // Återställ kartans vy till användarens plats (om tillgänglig) eller en standardposition
+  if (userLocation) {
+    map.setView(userLocation, 13); // Fokusera på användarens plats med zoomnivå 13
+  } else {
+    const defaultLocation = [56.05, 12.7]; // Standardplats (Helsingborg)
+    map.setView(defaultLocation, 13); // Fokusera på standardpositionen
+  }
+}
 
 // Skapa Leaflet karta som är centrerad på Helsingborg
 var map = L.map('map').setView([56.05, 12.7], 13);
@@ -297,6 +340,18 @@ function resetSelection() {
 
 // Lägg till eventlyssnare för sökknappen
 document.getElementById('search-button').addEventListener('click', function () {
+  // Kolla om användaren är inloggad
+  const user = auth.currentUser; // Hämta aktuell användare
+
+  console.log('Sökknappen klickad!');
+  console.log('Nuvarande användare:', user);
+
+  if (!user) {
+    alert('Du måste vara inloggad för att söka efter events.');
+    console.log('Ingen användare är inloggad. Popup ska visas.');
+    return; // Stoppar här om användaren inte är inloggad
+  }
+
   const cityInput = document.getElementById('city-input').value.trim();
   const eventList = document.getElementById('event-list');
   eventList.innerHTML = '';
@@ -319,7 +374,7 @@ document.getElementById('search-button').addEventListener('click', function () {
   // Nollställ val av markörer för rutt
   resetSelection();
 
-  // Hämta events från Firestore på region eller stad
+  // Hämta events från Firestore om användaren är inloggad
   getDocs(collection(db, 'Events')).then((result) => {
     let foundEvents = false;
 
