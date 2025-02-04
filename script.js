@@ -356,6 +356,9 @@ document.getElementById('search-button').addEventListener('click', function () {
   const eventList = document.getElementById('event-list');
   eventList.innerHTML = '';
 
+  // Sätt värdet på city-input till en tom sträng när sökningen görs
+  document.getElementById('city-input').value = '';
+
   if (!cityInput) {
     alert('Vänligen ange en stad eller region.');
     return;
@@ -424,7 +427,7 @@ const qrcodeContainer = document.getElementById('qrcode');
 console.log(qrcodeContainer);
 
 // Skapa en QR-kod med rätt metod
-QRCode.toCanvas(qrcodeContainer, ' https://hayssa5.github.io/EventMap/', {
+QRCode.toCanvas(qrcodeContainer, 'https://hayssa5.github.io/EventMap/', {
   width: 128, // Bredd på QR-koden
   color: {
     dark: '#000000', // Färg på QR-koden
